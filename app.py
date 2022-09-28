@@ -2,6 +2,7 @@ from aiohttp import web
 import socketio
 import uuid
 import random
+import os
 
 ## creates a new Async Socket IO Server
 # sio = socketio.AsyncServer()
@@ -242,4 +243,4 @@ app.router.add_get('/', index)
 
 ## We kick off our server
 if __name__ == '__main__':
-    web.run_app(app, port=5000)
+    web.run_app(host='0.0.0.0', port=os.environ.get('PORT', '5000'))
