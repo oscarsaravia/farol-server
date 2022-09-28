@@ -242,4 +242,4 @@ app.router.add_get('/', index)
 
 ## We kick off our server
 if __name__ == '__main__':
-    web.run_app(app)
+    web.run_app(app, port=80)
