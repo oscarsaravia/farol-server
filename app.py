@@ -207,7 +207,6 @@ async def next_turn(_, card, room_id, username):
 '''
 @sio.on('farol')
 async def farol(_, telltale, accused, room_id):
-    print('farol', rooms[room_id]['stack'][-1], rooms[room_id]['actual_card'])
     last_card_in_stack = rooms[room_id]['stack'][-1]
     index_last_card = (play_cards.index(rooms[room_id]['actual_card']) - 1) % len(play_cards) 
     last_card = play_cards[index_last_card]
@@ -233,6 +232,33 @@ async def farol(_, telltale, accused, room_id):
             "telltale": telltale,
             "accused": accused,
             "players": rooms[room_id]['players'],
+            "room_id": room_id,
+        }
+    })
+
+'''
+  @param winner string
+  @param room_id string
+  @return {
+    response,
+    code,
+    body: {
+      winner: string,
+      room_id: string,
+    }
+  }
+'''
+@sio.on('finish_game')
+async def finis_game(_, winner, room_id):
+    # remove the room if it exists
+    if room_id in rooms:
+        del rooms[room_id]
+    print("Game finished in room: " , room_id, " Winner: ", winner)
+    await sio.emit('game_finished', {
+        "response": "game_finished",
+        "code": 200,
+        "body": {
+            "winner": winner,
             "room_id": room_id,
         }
     })
