@@ -125,6 +125,8 @@ async def start_game(_, room_id):
     for i in range(len(players)):
         rooms[room_id]['players'][players[i]]['position'] = i
 
+    rooms[room_id]['messages'] = []
+
     # add the card to the actual_card
     rooms[room_id]['actual_card'] = '_A'
 
@@ -260,6 +262,39 @@ async def finis_game(_, winner, room_id):
         "body": {
             "winner": winner,
             "room_id": room_id,
+        }
+    })
+
+'''
+  @param username string
+  @param room_id string
+  @param message string
+  @return {
+    response,
+    code,
+    body: {
+      chat: [{
+        username: string,
+        message: string,
+      }]
+    }
+  }
+'''
+@sio.on('send_message')
+async def send_message(_, username, room_id, message):
+    message = {
+        "username": username,
+        "message": message,
+    }
+    rooms[room_id]['messages'].append(message)
+
+    print("New message from:" , username, "message: ", message, " in room: " , room_id)
+    await sio.emit('message_recieved', {
+        "response": "message_recieved",
+        "code": 200,
+        "body": {
+            "room_id": room_id,
+            "chat": rooms[room_id]['messages'],
         }
     })
 
