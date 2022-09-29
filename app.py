@@ -30,7 +30,8 @@ play_cards = ['_A', '_2', '_3', '_4', '_5', '_6', '_7', '_8', '_9', '_10', '_J',
     response,
     code,
     body: {
-      room_id
+      room_id string,
+      owner string
     }
   }
 '''
@@ -106,7 +107,9 @@ async def join_room(_, room_id, username):
         username: string,
         position: number,
         cards: strings[]
-      }]
+      }],
+      next_player: string,
+      next_card string
     }
   }
 '''
@@ -152,6 +155,11 @@ async def start_game(_, room_id):
     body: {
       next_player: string,
       last_player: string,
+      next_card: string,
+      players: [{
+        username: string,
+        position: number,
+        cards: strings[]
     }
   }
 '''
@@ -169,7 +177,7 @@ async def next_turn(_, card, room_id, username):
     for player in rooms[room_id]['players']:
         if rooms[room_id]['players'][player]['position'] == next_player:
             next_player_username = player
-    
+
     # find the next card to play
     next_card = ''
     for card in play_cards:
@@ -177,7 +185,7 @@ async def next_turn(_, card, room_id, username):
             next_card = play_cards[(play_cards.index(card) + 1) % len(play_cards)]
             rooms[room_id]['actual_card'] = next_card
             break
-            
+
 
     print("Next turn is for: ", next_player_username, " in room: " , room_id, 'current stack: ', rooms[room_id]['stack'])
     await sio.emit('next_turn', {
@@ -199,10 +207,14 @@ async def next_turn(_, card, room_id, username):
     response,
     code,
     body: {
-      answer: string,
+      answer: boolean,
       telltale: string,
       accused: string,
-      cards: string[],
+      players: [{
+        username: string,
+        position: number,
+        cards: strings[]
+      }]
       room_id: string,
     }
   }
@@ -210,7 +222,7 @@ async def next_turn(_, card, room_id, username):
 @sio.on('farol')
 async def farol(_, telltale, accused, room_id):
     last_card_in_stack = rooms[room_id]['stack'][-1]
-    index_last_card = (play_cards.index(rooms[room_id]['actual_card']) - 1) % len(play_cards) 
+    index_last_card = (play_cards.index(rooms[room_id]['actual_card']) - 1) % len(play_cards)
     last_card = play_cards[index_last_card]
     answer = last_card not in last_card_in_stack and 'JOKER' not in last_card_in_stack
 
@@ -276,7 +288,8 @@ async def finis_game(_, winner, room_id):
       chat: [{
         username: string,
         message: string,
-      }]
+      }],
+      room_id: string
     }
   }
 '''
