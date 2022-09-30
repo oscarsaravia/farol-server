@@ -88,6 +88,7 @@ async def join_room(_, room_id, username):
         "room_id": room_id,
         "owner": rooms[room_id]['players']['owner']['username'],
         "players": rooms[room_id]['players'],
+        "username": username,
       }
     })
   else:
